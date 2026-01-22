@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reaction Game</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)}
+.container{text-align:center;padding:2rem;background:rgba(255,255,255,.95);border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.3);max-width:500px;width:90%}
+h1{color:#667eea;margin-bottom:1.5rem;font-size:2rem}
+.box{width:100%;height:300px;border-radius:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:bold;transition:transform .2s;margin:1.5rem 0}
+.box:active{transform:scale(.95)}
+.wait{background:#e74c3c;color:#fff}
+.ready{background:#2ecc71;color:#fff;animation:pulse 1s infinite}
+.early{background:#e67e22;color:#fff}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.5rem}
+.stat{background:#f8f9fa;padding:1rem;border-radius:10px}
+.stat-label{font-size:.875rem;color:#666;margin-bottom:.25rem}
+.stat-value{font-size:1.5rem;font-weight:bold;color:#667eea}
+button{background:#667eea;color:#fff;border:none;padding:1rem 2rem;font-size:1rem;border-radius:10px;cursor:pointer;margin-top:1rem;transition:background .3s}
+button:hover{background:#764ba2}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>⚡ Reaction Game</h1>
+<div class="box wait" id="box">Click to Start</div>
+<div class="stats">
+<div class="stat">
+<div class="stat-label">Last Time</div>
+<div class="stat-value" id="last">-</div>
+</div>
+<div class="stat">
+<div class="stat-label">Best Time</div>
+<div class="stat-value" id="best">-</div>
+</div>
+</div>
+<button id="reset">Reset Best</button>
+</div>
+<script>
+const box=document.getElementById('box');
+const lastEl=document.getElementById('last');
+const bestEl=document.getElementById('best');
+const resetBtn=document.getElementById('reset');
+let state='wait',start,best=localStorage.getItem('best')||null;
+if(best)bestEl.textContent=best+'ms';
+
+box.onclick=()=>{
+if(state==='wait'){
+state='waiting';
+box.className='box wait';
+box.textContent='Wait for green...';
+setTimeout(()=>{
+state='ready';
+box.className='box ready';
+box.textContent='CLICK NOW!';
+start=Date.now();
+},Math.random()*3000+2000);
+}else if(state==='waiting'){
+state='wait';
+box.className='box early';
+box.textContent='Too early! Click to retry';
+}else if(state==='ready'){
+const time=Date.now()-start;
+lastEl.textContent=time+'ms';
+if(!best||time<best){
+best=time;
+bestEl.textContent=time+'ms';
+localStorage.setItem('best',best);
+}
+state='wait';
+box.className='box wait';
+box.textContent='🎉 '+time+'ms! Click to retry';
+}
+};
+
+resetBtn.onclick=()=>{
+localStorage.removeItem('best');
+best=null;
+bestEl.textContent='-';
+};
+</script>
+</body>
+</html>
